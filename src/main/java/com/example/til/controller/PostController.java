@@ -1,6 +1,7 @@
 package com.example.til.controller;
 
 import com.example.til.domain.Member;
+import com.example.til.domain.Position;
 import com.example.til.domain.Post;
 import com.example.til.domain.PostForm;
 import com.example.til.repository.MemberRepository;
@@ -84,7 +85,8 @@ public class PostController {
         Optional<Post> postOptional = postRepository.findById(postId);
         if (postOptional.isPresent()) {
             Post post = postOptional.get();
-            if (post.getAuthor().getId().equals(loggedInMember.getId())) {
+            if (post.getAuthor().getId().equals(loggedInMember.getId()) ||
+                    loggedInMember.getPosition() == Position.MASTER) {
                 postRepository.deleteById(postId);
                 return ResponseEntity.ok("게시글이 성공적으로 삭제되었습니다.");
             } else {

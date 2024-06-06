@@ -1,9 +1,6 @@
 package com.example.til.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import java.util.Base64;
 
@@ -19,6 +16,16 @@ public class Member {
     private String nickname;
     private String password1;
     private String password2;
+    @Enumerated(EnumType.STRING)
+    private Position position;
+
+    public Position getPosition() {
+        return position;
+    }
+
+    public void setPosition(Position position) {
+        this.position = position;
+    }
 
     public Member() {}
 

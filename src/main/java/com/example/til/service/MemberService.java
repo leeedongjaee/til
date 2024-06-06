@@ -68,7 +68,6 @@ public class MemberService {
     }
 
 
-        // other methods...
 
 
 }

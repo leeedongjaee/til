@@ -1,9 +1,6 @@
 package com.example.til.controller;
 
-import com.example.til.domain.Guestbook;
-import com.example.til.domain.Member;
-import com.example.til.domain.MemberForm;
-import com.example.til.domain.Post;
+import com.example.til.domain.*;
 import com.example.til.service.GuestbookService;
 import com.example.til.service.MemberService;
 import com.example.til.service.PostService;
@@ -51,6 +48,7 @@ public class MemberController {
         member.setEmail(form.getEmail());
         member.setPassword1(form.getPassword1());
         member.setPassword2(form.getPassword2());
+        member.setPosition(Position.MEMBER);
         memberService.join(member);
 
         return ResponseEntity.status(HttpStatus.CREATED).body("회원 가입이 완료되었습니다.");
@@ -187,6 +185,11 @@ public class MemberController {
 
         guestbookService.addGuestbookEntry(memberOpt.get(), message);
         return ResponseEntity.status(HttpStatus.CREATED).body("방명록에 성공적으로 작성되었습니다.");
+    }
+    @GetMapping("/members")
+    public ResponseEntity<List<Member>> getAllMembers() {
+        List<Member> members = memberService.findMembers();
+        return ResponseEntity.ok(members);
     }
 
 
