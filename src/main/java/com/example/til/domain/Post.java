@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,6 +33,18 @@ public class Post {
     private int likeCount;  // 추가: 좋아요 수
     private int viewCount;  // 조회수 추가@ElementCollection
 
+    @ElementCollection
+    @CollectionTable(name = "post_image_urls", joinColumns = @JoinColumn(name = "post_id"))
+    @Column(name = "image_url", length = 1024)
+    private List<String> imageUrls = new ArrayList<>();
+
+    public List<String> getImageUrls() {
+        return imageUrls;
+    }
+
+    public void setImageUrls(List<String> imageUrls) {
+        this.imageUrls = imageUrls;
+    }
 
     @ManyToMany
     @JoinTable(
@@ -40,12 +53,14 @@ public class Post {
             inverseJoinColumns = @JoinColumn(name = "member_id")
     )
     private Set<Member> likes = new HashSet<>();  // 추가: 좋아요를 누른 사용자 목록
-
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<Comment> comments;
 
-    public Post(){}
+
+    public Post() {
+    }
+
     // Getter, Setter 및 기타 메서드 추가
     public Long getId() {
         return id;
@@ -121,6 +136,7 @@ public class Post {
         comments.remove(comment);
         comment.setPost(null);
     }
+
     public int getViewCount() {
         return viewCount;
     }
@@ -141,3 +157,4 @@ public class Post {
         return getClass().hashCode();
     }
 }
+

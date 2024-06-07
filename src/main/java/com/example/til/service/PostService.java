@@ -4,10 +4,19 @@ import com.example.til.domain.Post;
 import com.example.til.repository.MemberRepository;
 import com.example.til.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,16 +31,42 @@ public class PostService {
         this.memberRepository = memberRepository;
     }
 
-    public void createPost(String title, String content, Member author) {
-        Post post = new Post();
-        post.setTitle(title);
-        post.setContent(content);
-        post.setCreatedAt(LocalDateTime.now());
-        post.setAuthor(author);
-        post.setLikeCount(0);
-        post.setViewCount(0);
+    @Value("${file.upload-dir}")
+    private String uploadDir;
+    public void createPost(Post post) {
+
 
         postRepository.save(post);
+    }
+    public List<String> saveImages(List<MultipartFile> images) throws IOException {
+        List<String> imageUrls = new ArrayList<>();
+        for (MultipartFile image : images) {
+            String fileName = saveImage(image);
+            String fileUrl = "/images/" + fileName; // URL 경로
+            imageUrls.add(fileUrl);
+        }
+        return imageUrls;
+    }
+
+    private String saveImage(MultipartFile image) throws IOException {
+        String fileName = System.currentTimeMillis() + "_" + image.getOriginalFilename();
+        Path filePath = Paths.get(uploadDir, fileName);
+        File file = new File(filePath.toString());
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+        image.transferTo(filePath.toFile());
+        return fileName;
+    }
+    public void deleteImages(List<String> imageUrls) {
+        Path rootLocation = Paths.get(uploadDir);
+        imageUrls.forEach(imageUrl -> {
+            try {
+                Files.deleteIfExists(rootLocation.resolve(imageUrl.replace("/upload-dir/", "")));
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to delete file " + imageUrl, e);
+            }
+        });
     }
 
     public List<Post> getAllPosts() {

@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,15 +42,33 @@ public class PostController {
         this.likeService = likeService;
     }
 
-    @PostMapping("/post/new")
-    public ResponseEntity<String> createPost(@RequestBody PostForm postForm,
+    @PostMapping("/posts/new")
+    public ResponseEntity<String> createPost(@RequestParam("title") String title,
+                                             @RequestParam("content") String content,
+                                             @RequestPart(value = "images", required = false) List<MultipartFile> images,
                                              HttpSession session) throws IOException {
         Member loggedInMember = (Member) session.getAttribute("loggedInMember");
         if (loggedInMember == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
         }
 
-        postService.createPost(postForm.getTitle(), postForm.getContent(), loggedInMember);
+        Post post = new Post();
+        post.setTitle(title);
+        post.setContent(content);
+        post.setCreatedAt(LocalDateTime.now());
+        post.setAuthor(loggedInMember);
+        post.setLikeCount(0);
+        post.setViewCount(0);
+
+        if (images != null && !images.isEmpty()) {
+            List<String> imageUrls = postService.saveImages(images);
+            post.setImageUrls(imageUrls);
+        } else {
+            post.setImageUrls(Collections.emptyList());
+        }
+
+        postService.createPost(post);
+
         return ResponseEntity.status(HttpStatus.CREATED).body("게시글이 성공적으로 작성되었습니다.");
     }
 
