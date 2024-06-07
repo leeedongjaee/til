@@ -139,6 +139,18 @@ public class PostController {
                     post.setContent(content);
                 }
 
+                // 기존 이미지 삭제
+                List<String> existingImageUrls = post.getImageUrls();
+                postService.deleteImages(existingImageUrls);
+
+                // 새로운 이미지 저장
+                if (images != null && !images.isEmpty()) {
+                    List<String> newImageUrls = postService.saveImages(images);
+                    post.setImageUrls(newImageUrls);
+                } else {
+                    post.setImageUrls(Collections.emptyList());
+                }
+
                 postRepository.save(post);
                 return ResponseEntity.ok("게시글이 성공적으로 수정되었습니다.");
             } else {
